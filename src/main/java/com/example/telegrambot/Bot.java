@@ -19,20 +19,20 @@ public class Bot extends TelegramLongPollingBot
     {
         Properties props = new Properties();
         try (FileInputStream fis = new FileInputStream("src/main/resources/bot.properties"))
-	{
+		{
             props.load(fis);
             this.botToken = props.getProperty("bot.token");
             this.botUsername = props.getProperty("bot.username");
             if (botToken == null || botUsername == null)
-	    {
+	    	{
                 throw new RuntimeException("botToken or botUsername not set in bot.properties file");
             }
         }
-	catch (Exception e)
-	{
+		catch (Exception e)
+		{
             throw new RuntimeException("Failed to load configuration", e);
         }
-    }
+	}
 
     @Override
     public String getBotUsername()
@@ -50,17 +50,17 @@ public class Bot extends TelegramLongPollingBot
     public void onUpdateReceived(Update update)
     {
         if (update.hasMessage() && update.getMessage().hasText())
-	{
+		{
             String chatId = update.getMessage().getChatId().toString();
             SendMessage message = new SendMessage();
             message.setChatId(chatId);
             message.setText("Hello, World!");
             try
-	    {
+	    	{
                 execute(message);
             }
-	    catch (TelegramApiException e)
-	    {
+	    	catch (TelegramApiException e)
+	    	{
                 e.printStackTrace();
             }
         }
@@ -69,12 +69,12 @@ public class Bot extends TelegramLongPollingBot
     public static void main(String[] args)
     {
         try
-	{
+		{
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
             botsApi.registerBot(new Bot());
         }
-	catch (TelegramApiException e)
-	{
+		catch (TelegramApiException e)
+		{
             e.printStackTrace();
         }
     }

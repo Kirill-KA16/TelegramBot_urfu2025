@@ -14,25 +14,35 @@ public class Bot extends TelegramLongPollingBot
 {
     private final String botToken;
     private final String botUsername;
+    private final CommandRegistry commandRegistry;
 
     public Bot()
     {
         Properties props = new Properties();
         try (FileInputStream fis = new FileInputStream("src/main/resources/bot.properties"))
-		{
+        {
             props.load(fis);
             this.botToken = props.getProperty("bot.token");
             this.botUsername = props.getProperty("bot.username");
             if (botToken == null || botUsername == null)
-	    	{
+            {
                 throw new RuntimeException("botToken or botUsername not set in bot.properties file");
             }
         }
-		catch (Exception e)
-		{
+        catch (Exception e)
+        {
             throw new RuntimeException("Failed to load configuration", e);
         }
-	}
+        
+        this.commandRegistry = new CommandRegistry();
+        registerCommands();
+    }
+    
+    private void registerCommands() {
+        commandRegistry.registerCommand(new AboutCommand());
+        commandRegistry.registerCommand(new AuthorsCommand());
+        commandRegistry.registerCommand(new HelpCommand(commandRegistry));
+    }
 
     @Override
     public String getBotUsername()
@@ -50,33 +60,70 @@ public class Bot extends TelegramLongPollingBot
     public void onUpdateReceived(Update update)
     {
         if (update.hasMessage() && update.getMessage().hasText())
-		{
-            String chatId = update.getMessage().getChatId().toString();
-            SendMessage message = new SendMessage();
-            message.setChatId(chatId);
-            message.setText("Hello, World!");
-            try
-	    	{
-                execute(message);
-            }
-	    	catch (TelegramApiException e)
-	    	{
-                e.printStackTrace();
+        {
+            String messageText = update.getMessage().getText();
+            
+            if (commandRegistry.isCommand(messageText)) 
+	    {
+                processCommand(update);
+            } else {
+                processTextMessage(update);
             }
         }
     }
+    
+private void processCommand(Update update) 
+{
+    String messageText = update.getMessage().getText();
+    
+    if (commandRegistry.isExactCommand(messageText)) 
+    {
+        Command command = commandRegistry.getCommand(messageText);
+        
+        if (command != null) 
+	{
+            SendMessage reply = command.execute(update.getMessage());
+            try 
+	    {
+                execute(reply);
+            } 
+	    catch (TelegramApiException e) 
+	    {
+                System.err.println("Error: " + e.getMessage());
+            }
+        } else {
+            sendUnknownCommand(update);
+        }
+    } else {
+        sendUnknownCommand(update);
+    }
+}
+
+private void sendUnknownCommand(Update update) 
+{
+    SendMessage errorReply = new SendMessage();
+    errorReply.setChatId(update.getMessage().getChatId().toString());
+    errorReply.setText("Unknown command");
+    try 
+    {
+        execute(errorReply);
+    } 
+    catch (TelegramApiException e) 
+    {
+        System.out.println("Error: " + e.getMessage());
+    }
+}
 
     public static void main(String[] args)
     {
         try
-		{
+        {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
             botsApi.registerBot(new Bot());
         }
-		catch (TelegramApiException e)
-		{
+        catch (TelegramApiException e)
+        {
             e.printStackTrace();
         }
     }
 }
-

@@ -38,7 +38,8 @@ public class Bot extends TelegramLongPollingBot
         registerCommands();
     }
     
-    private void registerCommands() {
+    private void registerCommands()
+    {
         commandRegistry.registerCommand(new AboutCommand());
         commandRegistry.registerCommand(new AuthorsCommand());
         commandRegistry.registerCommand(new HelpCommand(commandRegistry));
@@ -63,56 +64,62 @@ public class Bot extends TelegramLongPollingBot
         {
             String messageText = update.getMessage().getText();
             
-            if (commandRegistry.isCommand(messageText)) 
-	    {
+            if (commandRegistry.isCommand(messageText))
+            {
                 processCommand(update);
-            } else {
+            }
+            else
+            {
                 processTextMessage(update);
             }
         }
     }
     
-private void processCommand(Update update) 
-{
-    String messageText = update.getMessage().getText();
-    
-    if (commandRegistry.isExactCommand(messageText)) 
+    private void processCommand(Update update)
     {
-        Command command = commandRegistry.getCommand(messageText);
+        String messageText = update.getMessage().getText();
         
-        if (command != null) 
-	{
-            SendMessage reply = command.execute(update.getMessage());
-            try 
-	    {
-                execute(reply);
-            } 
-	    catch (TelegramApiException e) 
-	    {
-                System.err.println("Error: " + e.getMessage());
+        if (commandRegistry.isExactCommand(messageText))
+        {
+            Command command = commandRegistry.getCommand(messageText);
+            
+            if (command != null)
+            {
+                SendMessage reply = command.execute(update.getMessage());
+                try
+                {
+                    execute(reply);
+                }
+                catch (TelegramApiException e)
+                {
+                    System.err.println("Error: " + e.getMessage());
+                }
             }
-        } else {
-            sendUnknownCommand(update);
+            else
+            {
+                processTextMessage(update);
+            }
         }
-    } else {
-        sendUnknownCommand(update);
+        else
+        {
+            processTextMessage(update);
+        }
     }
-}
 
-private void sendUnknownCommand(Update update) 
-{
-    SendMessage errorReply = new SendMessage();
-    errorReply.setChatId(update.getMessage().getChatId().toString());
-    errorReply.setText("Unknown command");
-    try 
+    private void processTextMessage(Update update)
     {
-        execute(errorReply);
-    } 
-    catch (TelegramApiException e) 
-    {
-        System.out.println("Error: " + e.getMessage());
+        SendMessage reply = new SendMessage();
+        reply.setChatId(update.getMessage().getChatId().toString());
+        reply.setText("??");
+        try
+        {
+            execute(reply);
+        }
+        catch (TelegramApiException e)
+        {
+            System.err.println("Error: " + e.getMessage());
+        }
     }
-}
 
     public static void main(String[] args)
     {

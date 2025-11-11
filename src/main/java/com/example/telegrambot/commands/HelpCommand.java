@@ -25,7 +25,7 @@ public class HelpCommand extends Command
         
         if (text.contains(" ")) 
         {
-            String commandName = text.split(" ")[1].replace("/", "").trim;
+            String commandName = text.split(" ")[1].replace("/", "").trim();
             reply.setText(getCommandHelp(commandName));
         } else 
         {

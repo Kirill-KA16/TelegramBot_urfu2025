@@ -64,7 +64,7 @@ public class HelpCommand extends Command
             return command.getDetailedHelp();
         } else 
 	{
-            return "Command '" + commandName + "' not found.\n"
+            return "Command '" + commandName + "' not found.\n";
         }
     }
 }

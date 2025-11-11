@@ -23,6 +23,7 @@ public class CommandRegistry
             String cleanInput = input.replace("/", "").trim();
             return commands.get(cleanInput);
 	}
+	return null;
     }
 
     public Command getCommandByName(String name) 

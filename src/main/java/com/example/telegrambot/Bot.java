@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import com.example.telegrambot.commands.*;
 
 import java.util.Properties;
 import java.io.FileInputStream;
@@ -65,11 +66,11 @@ public class Bot extends TelegramLongPollingBot
             String messageText = update.getMessage().getText();
             
             if (commandRegistry.isCommand(messageText))
-            {
+	    {
                 processCommand(update);
             }
-            else
-            {
+	    else
+	    {
                 processTextMessage(update);
             }
         }
@@ -78,45 +79,47 @@ public class Bot extends TelegramLongPollingBot
     private void processCommand(Update update)
     {
         String messageText = update.getMessage().getText();
+        Command command = commandRegistry.getCommand(messageText);
         
-        if (commandRegistry.isExactCommand(messageText))
-        {
-            Command command = commandRegistry.getCommand(messageText);
-            
-            if (command != null)
-            {
-                SendMessage reply = command.execute(update.getMessage());
-                try
-                {
-                    execute(reply);
-                }
-                catch (TelegramApiException e)
-                {
-                    System.err.println("Error: " + e.getMessage());
-                }
+        if (command != null)
+	{
+            SendMessage reply = command.execute(update.getMessage());
+            try
+	    {
+                execute(reply);
             }
-            else
-            {
-                processTextMessage(update);
+	    catch (TelegramApiException e)
+	    {
+                System.err.println("Error: " + e.getMessage());
             }
         }
-        else
-        {
-            processTextMessage(update);
+	else
+	{
+            SendMessage errorReply = new SendMessage();
+            errorReply.setChatId(update.getMessage().getChatId().toString());
+            errorReply.setText("unknown command");
+            try
+	    {
+                execute(errorReply);
+            }
+	    catch (TelegramApiException e)
+	    {
+                System.out.println("Error: " + e.getMessage());
+            }
         }
     }
-
+    
     private void processTextMessage(Update update)
     {
         SendMessage reply = new SendMessage();
         reply.setChatId(update.getMessage().getChatId().toString());
         reply.setText("??");
         try
-        {
+	{
             execute(reply);
         }
-        catch (TelegramApiException e)
-        {
+	catch (TelegramApiException e)
+	{
             System.err.println("Error: " + e.getMessage());
         }
     }

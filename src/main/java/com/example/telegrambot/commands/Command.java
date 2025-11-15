@@ -3,8 +3,8 @@ package com.example.telegrambot.commands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
-public abstract class Command 
-    {
+public abstract class Command
+{
     private final String name;
     private final String description;
 

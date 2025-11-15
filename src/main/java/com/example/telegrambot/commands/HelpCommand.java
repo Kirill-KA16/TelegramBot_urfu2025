@@ -5,7 +5,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import java.util.List;
 
 public class HelpCommand extends Command 
-    {
+{
     
     private final CommandRegistry commandRegistry;
     
@@ -19,15 +19,17 @@ public class HelpCommand extends Command
     public SendMessage execute(Message message) 
     {
         String text = message.getText();
+        String[] parts = text.split(" ", 2);
         
         SendMessage reply = new SendMessage();
         reply.setChatId(message.getChatId().toString());
         
-        if (text.contains(" ")) 
+        if (parts.length > 1) 
         {
-            String commandName = text.split(" ")[1].replace("/", "").trim();
+            String commandName = parts[1].replace("/", "");
             reply.setText(getCommandHelp(commandName));
-        } else 
+        }
+	else 
         {
             reply.setText(getAllCommandsHelp());
         }
@@ -52,7 +54,7 @@ public class HelpCommand extends Command
             }
         }
         
-        helpText.append("Use /help <command> for detailed help");
+        helpText.append("use help");
         return helpText.toString();
     }
     
@@ -62,7 +64,8 @@ public class HelpCommand extends Command
         if (command != null) 
 	{
             return command.getDetailedHelp();
-        } else 
+        }
+	else 
 	{
             return "Command '" + commandName + "' not found.\n";
         }

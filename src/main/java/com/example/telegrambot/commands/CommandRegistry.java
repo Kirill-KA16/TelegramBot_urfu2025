@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CommandRegistry 
-    {
+{
     private final Map<String, Command> commands = new HashMap<>();
     private final List<Command> commandList = new ArrayList<>();
 
@@ -19,11 +19,8 @@ public class CommandRegistry
 
     public Command getCommand(String input) 
     {
-	if (isExactCommand(input)) {
-            String cleanInput = input.replace("/", "").trim();
-            return commands.get(cleanInput);
-	}
-	return null;
+        String cleanInput = input.replace("/", "").trim();
+        return commands.get(cleanInput);
     }
 
     public Command getCommandByName(String name) 
@@ -41,14 +38,5 @@ public class CommandRegistry
     public boolean isCommand(String text) 
     {
         return text != null && text.startsWith("/");
-    }
- public boolean isExactCommand(String text) 
-    {
-        if (text == null || !text.startsWith("/")) {
-            return false;
-        }
-        
-        String commandName = text.replace("/", "").trim();
-        return commands.containsKey(commandName);
     }
 }

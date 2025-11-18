@@ -10,41 +10,44 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProfileCommand extends Command {
+public class ProfileCommand extends Command 
+{
     
-    private final FitnessDatabaseManager dbManager;
+    private final DatabaseManager dbManager;
     
-    public ProfileCommand() {
-        super("profile", "Показать ваш фитнес-профиль");
-        this.dbManager = FitnessDatabaseManager.getInstance();
+    public ProfileCommand() 
+    {
+        super("profile", "Show your profile");
+        this.dbManager = DatabaseManager.getInstance();
     }
 
     @Override
-    public SendMessage execute(Message message) {
+    public SendMessage execute(Message message) 
+    {
         Long userId = message.getFrom().getId();
         User user = dbManager.getUser(userId);
         
         SendMessage reply = new SendMessage();
         reply.setChatId(message.getChatId().toString());
         
-        if (user != null) {
+        if (user != null && user.getGoal() != null) 
+        {
             reply.setText(user.toString());
         } else {
-            reply.setText(" Профиль не найден. Используйте /setup для создания профиля");
+            reply.setText("Profile isn't found. Use /profile edit to make a profile");
         }
 
-        // Кнопки для управления профилем
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         
         List<InlineKeyboardButton> row1 = new ArrayList<>();
-        InlineKeyboardButton setupBtn = new InlineKeyboardButton();
-        setupBtn.setText("Настроить профиль");
-        setupBtn.setCallbackData("setup_profile");
-        row1.add(setupBtn);
+        InlineKeyboardButton editBtn = new InlineKeyboardButton();
+        editBtn.setText("Edit Profile");
+        editBtn.setCallbackData("profile_edit");
+        row1.add(editBtn);
         
         InlineKeyboardButton planBtn = new InlineKeyboardButton();
-        planBtn.setText("Получить план");
+        planBtn.setText("Get Plan");
         planBtn.setCallbackData("get_plan");
         row1.add(planBtn);
         

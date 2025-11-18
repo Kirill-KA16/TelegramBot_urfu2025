@@ -8,7 +8,7 @@ public class ProfileEditCommand extends Command
     
     public ProfileEditCommand() 
     {
-        super("profile edit", "–едактировать фитнес-профиль");
+        super("profile edit", "Edit your profile");
     }
 
     @Override
@@ -16,7 +16,7 @@ public class ProfileEditCommand extends Command
     {
         SendMessage reply = new SendMessage();
         reply.setChatId(message.getChatId().toString());
-        reply.setText("?? ¬ыберите вашу цель:\nХ ѕохудение\nХ Ќабор массы\nХ ѕоддержание формы");
+        reply.setText("?? Choose your aim:\nХ "Weight loss"\nХ Mass gain\nХ Maintain fitness");
         return reply;
     }
 }        

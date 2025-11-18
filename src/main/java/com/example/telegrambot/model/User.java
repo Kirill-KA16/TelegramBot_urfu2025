@@ -2,7 +2,8 @@ package com.example.telegrambot.model;
 
 import java.time.LocalDateTime;
 
-public class User {
+public class User 
+{
     private Long userId;
     private String goal;
     private String gender;
@@ -17,7 +18,8 @@ public class User {
     public User() {}
 
     public User(Long userId, String goal, String gender, Integer age, 
-                Double weight, Double height, String fitnessLevel, String equipment) {
+                Double weight, Double height, String fitnessLevel, String equipment) 
+    {
         this.userId = userId;
         this.goal = goal;
         this.gender = gender;
@@ -73,20 +75,20 @@ public class User {
     public String toString() 
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("Ваш профиль:\n\n");
+        sb.append("Your profile:\n\n");
         
-        if (goal != null) sb.append("Цель: ").append(goal).append("\n");
-        if (gender != null) sb.append("Пол: ").append(gender).append("\n");
-        if (age != null) sb.append("Возраст: ").append(age).append(" лет\n");
-        if (weight != null) sb.append("Вес: ").append(weight).append(" кг\n");
-        if (height != null) sb.append("Рост: ").append(height).append(" см\n");
-        if (fitnessLevel != null) sb.append("Уровень: ").append(fitnessLevel).append("\n");
-        if (equipment != null) sb.append("Инвентарь: ").append(equipment).append("\n");
+        if (goal != null) sb.append("Goal: ").append(goal).append("\n");
+        if (gender != null) sb.append("Gender: ").append(gender).append("\n");
+        if (age != null) sb.append("Age: ").append(age).append(" years\n");
+        if (weight != null) sb.append("Weight: ").append(weight).append(" kg\n");
+        if (height != null) sb.append("Height: ").append(height).append(" cm\n");
+        if (fitnessLevel != null) sb.append("Level: ").append(fitnessLevel).append("\n");
+        if (equipment != null) sb.append("Equipment: ").append(equipment).append("\n");
         
         Double bmi = getBMI();
         if (bmi != null) 
         {
-            sb.append("ИМТ: ").append(String.format("%.1f", bmi)).append("\n");
+            sb.append("BMI: ").append(String.format("%.1f", bmi)).append("\n");
         }
         
         return sb.toString();

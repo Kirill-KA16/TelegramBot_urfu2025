@@ -16,7 +16,6 @@ public class UserMeasurement {
         this.measurementDate = measurementDate;
     }
 
-    // Геттеры и сеттеры
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

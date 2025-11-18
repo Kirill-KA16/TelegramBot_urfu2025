@@ -1,6 +1,7 @@
 package com.example.telegrambot.model;
 
-public class TrainingPlan {
+public class TrainingPlan 
+{
     private Long id;
     private String goal;
     private String fitnessLevel;
@@ -11,7 +12,8 @@ public class TrainingPlan {
     public TrainingPlan() {}
 
     public TrainingPlan(String goal, String fitnessLevel, String equipment, 
-                       String planDescription, String exercises) {
+                       String planDescription, String exercises) 
+    {
         this.goal = goal;
         this.fitnessLevel = fitnessLevel;
         this.equipment = equipment;
@@ -19,7 +21,6 @@ public class TrainingPlan {
         this.exercises = exercises;
     }
 
-    // Геттеры и сеттеры
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -39,12 +40,13 @@ public class TrainingPlan {
     public void setExercises(String exercises) { this.exercises = exercises; }
 
     @Override
-    public String toString() {
-        return "План тренировок:\n\n" +
-               "Цель: " + goal + "\n" +
-               "Уровень: " + fitnessLevel + "\n" +
-               "Оборудование: " + equipment + "\n\n" +
-               "Описание:\n" + planDescription + "\n\n" +
-               "Упражнения:\n" + exercises;
+    public String toString() 
+    {
+        return "Training Plan:\n\n" +
+               "Goal: " + goal + "\n" +
+               "Level: " + fitnessLevel + "\n" +
+               "Equipment: " + equipment + "\n\n" +
+               "Description:\n" + planDescription + "\n\n" +
+               "Exercises:\n" + exercises;
     }
 }

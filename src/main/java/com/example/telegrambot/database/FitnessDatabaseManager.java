@@ -23,7 +23,8 @@ public class FitnessDatabaseManager
 
     public static synchronized FitnessDatabaseManager getInstance() 
     {
-        if (instance == null) {
+        if (instance == null) 
+        {
             instance = new FitnessDatabaseManager();
         }
         return instance;
@@ -71,36 +72,38 @@ public class FitnessDatabaseManager
         };
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             Statement stmt = conn.createStatement()) {
+             Statement stmt = conn.createStatement()) 
+        {
             
             for (String sql : createTables) 
             {
                 stmt.execute(sql);
             }
             System.out.println("Fitness database initialized successfully");
-        } catch (SQLException e) 
-          {
+        } 
+        catch (SQLException e) 
+        {
             System.err.println("Error initializing database: " + e.getMessage());
         }
     }
 
     private void initializeTrainingPlans() 
-  {
+    {
         List<TrainingPlan> defaultPlans = List.of(
             new TrainingPlan(
-                "Похудение", "Начинающий", "Без инвентаря",
-                "Кардио тренировка для сжигания жита. Фокус на интервальных упражнениях.",
-                "1. Бег на месте - 3x30 сек\\n2. Приседания - 3x15\\n3. Планка - 3x30 сек\\n4. Берпи - 3x10"
+                "Weight loss", "Beginner", "No equipment",
+                "Cardio workout for fat burning. Focus on interval exercises.",
+                "1. Running in place - 3x30 sec\n2. Squats - 3x15\n3. Plank - 3x30 sec\n4. Burpees - 3x10"
             ),
             new TrainingPlan(
-                "Набор массы", "Средний", "Гантели",
-                "Силовая тренировка для роста мышц. Упор на базовые упражнения.",
-                "1. Жим гантелей - 4x10\\n2. Приседания с гантелями - 4x12\\n3. Тяга гантелей - 4x10\\n4. Подъем на бицепс - 3x15"
+                "Mass gain", "Intermediate", "Dumbbells",
+                "Strength training for muscle growth. Emphasis on basic exercises.",
+                "1. Dumbbell press - 4x10\n2. Dumbbell squats - 4x12\n3. Dumbbell rows - 4x10\n4. Bicep curls - 3x15"
             ),
             new TrainingPlan(
-                "Поддержание формы", "Начинающий", "Без инвентаря",
-                "Сбалансированная тренировка для поддержания тонуса мышц.",
-                "1. Отжимания - 3x12\\n2. Выпады - 3x10\\n3. Скручивания - 3x15\\n4. Планка - 3x45 сек"
+                "Maintain fitness", "Beginner", "No equipment",
+                "Balanced workout for maintaining muscle tone.",
+                "1. Push-ups - 3x12\n2. Lunges - 3x10\n3. Crunches - 3x15\n4. Plank - 3x45 sec"
             )
         );
 
@@ -110,6 +113,7 @@ public class FitnessDatabaseManager
         }
     }
 
+    // Methods for users
     public void saveUser(User user) 
     {
         String sql = """
@@ -134,8 +138,9 @@ public class FitnessDatabaseManager
             pstmt.setString(10, user.getUpdatedAt().toString());
             
             pstmt.executeUpdate();
-        } catch (SQLException e) 
-          {
+        } 
+        catch (SQLException e) 
+        {
             System.err.println("Error saving user: " + e.getMessage());
         }
     }
@@ -166,8 +171,9 @@ public class FitnessDatabaseManager
                 user.setUpdatedAt(LocalDateTime.parse(rs.getString("updated_at")));
                 return user;
             }
-        } catch (SQLException e) 
-          {
+        } 
+        catch (SQLException e) 
+        {
             System.err.println("Error getting user: " + e.getMessage());
         }
         return null;
@@ -190,8 +196,9 @@ public class FitnessDatabaseManager
             pstmt.setString(3, measurement.getMeasurementDate().toString());
             
             pstmt.executeUpdate();
-        } catch (SQLException e) 
-          {
+        } 
+        catch (SQLException e) 
+        {
             System.err.println("Error saving measurement: " + e.getMessage());
         }
     }
@@ -217,8 +224,9 @@ public class FitnessDatabaseManager
                 measurement.setMeasurementDate(LocalDate.parse(rs.getString("measurement_date")));
                 measurements.add(measurement);
             }
-        } catch (SQLException e) 
-          {
+        } 
+        catch (SQLException e) 
+        {
             System.err.println("Error getting measurements: " + e.getMessage());
         }
         return measurements;
@@ -244,6 +252,7 @@ public class FitnessDatabaseManager
             ResultSet rs = checkStmt.executeQuery();
             if (!rs.next()) 
             {
+                // Plan doesn't exist, add it
                 insertStmt.setString(1, plan.getGoal());
                 insertStmt.setString(2, plan.getFitnessLevel());
                 insertStmt.setString(3, plan.getEquipment());
@@ -251,8 +260,9 @@ public class FitnessDatabaseManager
                 insertStmt.setString(5, plan.getExercises());
                 insertStmt.executeUpdate();
             }
-        } catch (SQLException e) 
-          {
+        } 
+        catch (SQLException e) 
+        {
             System.err.println("Error saving training plan: " + e.getMessage());
         }
     }
@@ -281,8 +291,9 @@ public class FitnessDatabaseManager
                 plan.setExercises(rs.getString("exercises"));
                 return plan;
             }
-        } catch (SQLException e) 
-          {
+        } 
+        catch (SQLException e) 
+        {
             System.err.println("Error getting training plan: " + e.getMessage());
         }
         return null;
@@ -295,13 +306,16 @@ public class FitnessDatabaseManager
         
         try (Connection conn = DriverManager.getConnection(DB_URL);
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             ResultSet rs = stmt.executeQuery(sql)) 
+        {
             
-            while (rs.next()) {
+            while (rs.next()) 
+            {
                 goals.add(rs.getString("goal"));
             }
-        } catch (SQLException e) 
-          {
+        } 
+        catch (SQLException e) 
+        {
             System.err.println("Error getting goals: " + e.getMessage());
         }
         return goals;

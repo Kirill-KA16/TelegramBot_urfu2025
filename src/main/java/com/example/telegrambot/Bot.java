@@ -116,10 +116,10 @@ public class Bot extends TelegramLongPollingBot
             
             if (command != null)
             {
-                if (command instanceof ProfileEditStep) {
+                if (command instanceof ProfileEditCommand) {
                     Long userId = update.getMessage().getFrom().getId();
                     userStates.put(userId, "waiting_goal");
-                    sendMessage(userId, "Выберите вашу цель:\n• Похудение\n• Набор массы\n• Поддержание формы");
+                    sendMessage(userId, "Choose your goal:\n• Weight loss\n• Mass gain\n• Maintain fitness");
                     return;
                 }
                 
@@ -149,14 +149,14 @@ public class Bot extends TelegramLongPollingBot
             case "waiting_goal":
                 user.setGoal(messageText);
                 dbManager.saveUser(user);
-                sendMessage(userId, "Цель установлена: " + messageText + "\n Укажите ваш пол (М/Ж):");
+                sendMessage(userId, "Goal set: " + messageText + "\n Specify your gender (M/F):");
                 userStates.put(userId, "waiting_gender");
                 break;
                 
             case "waiting_gender":
                 user.setGender(messageText);
                 dbManager.saveUser(user);
-                sendMessage(userId, "Пол установлен\n Укажите ваш возраст:");
+                sendMessage(userId, "Gender set\n Specify your age:");
                 userStates.put(userId, "waiting_age");
                 break;
                 
@@ -164,10 +164,10 @@ public class Bot extends TelegramLongPollingBot
                 try {
                     user.setAge(Integer.parseInt(messageText));
                     dbManager.saveUser(user);
-                    sendMessage(userId, "Возраст установлен\n Укажите ваш вес (кг):");
+                    sendMessage(userId, "Age set\n Specify your weight (kg):");
                     userStates.put(userId, "waiting_weight");
                 } catch (NumberFormatException e) {
-                    sendMessage(userId, "Введите корректный возраст (число):");
+                    sendMessage(userId, "Enter correct age (number):");
                 }
                 break;
                 
@@ -175,10 +175,10 @@ public class Bot extends TelegramLongPollingBot
                 try {
                     user.setWeight(Double.parseDouble(messageText));
                     dbManager.saveUser(user);
-                    sendMessage(userId, "Вес установлен\n Укажите ваш рост (см):");
+                    sendMessage(userId, "Weight set\n Specify your height (cm):");
                     userStates.put(userId, "waiting_height");
                 } catch (NumberFormatException e) {
-                    sendMessage(userId, "Введите корректный вес (число):");
+                    sendMessage(userId, "Enter correct weight (number):");
                 }
                 break;
                 
@@ -186,25 +186,25 @@ public class Bot extends TelegramLongPollingBot
                 try {
                     user.setHeight(Double.parseDouble(messageText));
                     dbManager.saveUser(user);
-                    sendMessage(userId, "Рост установлен\n Выберите уровень подготовки (Начинающий/Средний/Продвинутый):");
+                    sendMessage(userId, "Height set\n Choose your fitness level (Beginner/Intermediate/Advanced):");
                     userStates.put(userId, "waiting_level");
                 } catch (NumberFormatException e) {
-                    sendMessage(userId, "Введите корректный рост (число):");
+                    sendMessage(userId, "Enter correct height (number):");
                 }
                 break;
                 
             case "waiting_level":
                 user.setFitnessLevel(messageText);
                 dbManager.saveUser(user);
-                sendMessage(userId, "Уровень установлен\n Укажите доступный инвентарь (Без инвентаря/Гантели/Тренажерный зал):");
+                sendMessage(userId, "Level set\n Specify available equipment (No equipment/Dumbbells/Gym):");
                 userStates.put(userId, "waiting_equipment");
                 break;
                 
             case "waiting_equipment":
                 user.setEquipment(messageText);
                 dbManager.saveUser(user);
-                sendMessage(userId, "?? Профиль настроен! Используйте /plan для получения плана тренировок");
-                userStates.remove(userId); // Завершаем настройку
+                sendMessage(userId, "?? Profile configured! Use /plan to get your training plan");
+                userStates.remove(userId);
                 break;
         }
     }
@@ -231,18 +231,18 @@ public class Bot extends TelegramLongPollingBot
         switch (callbackData) {
             case "profile_edit":
                 userStates.put(userId, "waiting_goal");
-                reply.setText("?? Выберите вашу цель:\n• Похудение\n• Набор массы\n• Поддержание формы");
+                reply.setText("?? Choose your goal:\n• Weight loss\n• Mass gain\n• Maintain fitness");
                 break;
             case "get_plan":
                 User user = dbManager.getUser(userId);
                 if (user != null && user.getGoal() != null) {
-                    reply.setText("Используйте команду /plan для получения вашего плана тренировок");
+                    reply.setText("Use /plan command to get your training plan");
                 } else {
-                    reply.setText("Сначала настройте профиль командой /profile edit");
+                    reply.setText("First configure your profile with /profile edit");
                 }
                 break;
             default:
-                reply.setText("Неизвестная команда");
+                reply.setText("Unknown command");
         }
         
         try {

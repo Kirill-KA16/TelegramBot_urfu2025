@@ -3,9 +3,7 @@ package com.example.telegrambot;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -55,9 +53,9 @@ public class Bot extends TelegramLongPollingBot
     {
         commandRegistry.registerCommand(new AboutCommand());
         commandRegistry.registerCommand(new AuthorsCommand());
-        commandRegistry.registerCommand(new StartCommand());
-        commandRegistry.registerCommand(new ProfileCommand());
         commandRegistry.registerCommand(new HelpCommand(commandRegistry));
+        commandRegistry.registerCommand(new ProfileCommand());
+        commandRegistry.registerCommand(new CalculatorsCommand());
     }
 
     @Override
@@ -75,18 +73,17 @@ public class Bot extends TelegramLongPollingBot
     @Override
     public void onUpdateReceived(Update update)
     {
-        // Обработка текстовых сообщений
         if (update.hasMessage() && update.getMessage().hasText())
         {
             String messageText = update.getMessage().getText();
-            long userId = update.getMessage().getFrom().getId();
 
-            if (commandRegistry.isCommand(messageText))
+            if (commandRegistry.isCommand(messageText) || messageText.startsWith("/help "))
             {
                 processCommand(update);
             }
             else
             {
+                long userId = update.getMessage().getFrom().getId();
                 UserState state = StateManager.getInstance().getState(userId);
                 if (state != UserState.NONE)
                 {
@@ -98,13 +95,10 @@ public class Bot extends TelegramLongPollingBot
                 }
             }
         }
-
-        // Обработка нажатий на inline-кнопки
         else if (update.hasCallbackQuery())
         {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             String data = callbackQuery.getData();
-
             if (data.startsWith("profile_")
                 || data.startsWith("goal_")
                 || data.startsWith("gender_")
@@ -127,7 +121,36 @@ public class Bot extends TelegramLongPollingBot
                             System.err.println("Error sending callback response: " + e.getMessage());
                         }
                     }
-
+                    AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
+                            .callbackQueryId(callbackQuery.getId())
+                            .build();
+                    try
+                    {
+                        execute(answer);
+                    }
+                    catch (TelegramApiException e)
+                    {
+                        System.err.println("Error answering callback query: " + e.getMessage());
+                    }
+                }
+            }
+            else if (data.startsWith("calc_"))
+            {
+                Command calculatorsCmd = commandRegistry.getCommandByName("calculators");
+                if (calculatorsCmd instanceof CalculatorsCommand calculatorsCommand)
+                {
+                    SendMessage response = calculatorsCommand.handleCallback(callbackQuery);
+                    if (response != null)
+                    {
+                        try
+                        {
+                            execute(response);
+                        }
+                        catch (TelegramApiException e)
+                        {
+                            System.err.println("Error sending callback response: " + e.getMessage());
+                        }
+                    }
                     // Подтверждаем получение callback
                     AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
                             .callbackQueryId(callbackQuery.getId())
@@ -148,7 +171,16 @@ public class Bot extends TelegramLongPollingBot
     private void processCommand(Update update)
     {
         String messageText = update.getMessage().getText();
-        Command command = commandRegistry.getCommand(messageText);
+        Command command = null;
+
+        if (messageText.startsWith("/help"))
+        {
+            command = commandRegistry.getCommand("/help");
+        }
+        else
+        {
+            command = commandRegistry.getCommand(messageText);
+        }
 
         if (command != null)
         {
@@ -159,18 +191,38 @@ public class Bot extends TelegramLongPollingBot
             }
             catch (TelegramApiException e)
             {
-                System.err.println("Error executing command: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage());
             }
         }
         else
         {
-            sendText(update.getMessage().getChatId().toString(), "Неизвестная команда");
+            SendMessage errorReply = new SendMessage();
+            errorReply.setChatId(update.getMessage().getChatId().toString());
+            errorReply.setText("unknown command");
+            try
+            {
+                execute(errorReply);
+            }
+            catch (TelegramApiException e)
+            {
+                System.out.println("Error: " + e.getMessage());
+            }
         }
     }
 
     private void processTextMessage(Update update)
     {
-        sendText(update.getMessage().getChatId().toString(), "Некорректное сообщение");
+        SendMessage reply = new SendMessage();
+        reply.setChatId(update.getMessage().getChatId().toString());
+        reply.setText("??");
+        try
+        {
+            execute(reply);
+        }
+        catch (TelegramApiException e)
+        {
+            System.err.println("Error: " + e.getMessage());
+        }
     }
 
     private void processProfileTextInput(Update update, UserState state)
@@ -179,17 +231,14 @@ public class Bot extends TelegramLongPollingBot
         long userId = message.getFrom().getId();
         String text = message.getText().trim().replace(",", ".");
         String chatId = message.getChatId().toString();
-
         User user = db.getUser(userId).orElseGet(() -> {
             User newUser = new User();
             newUser.setUserId(userId);
             db.updateUser(newUser);
             return newUser;
         });
-
         SendMessage reply = new SendMessage();
         reply.setChatId(chatId);
-
         try
         {
             switch (state)
@@ -208,7 +257,6 @@ public class Bot extends TelegramLongPollingBot
                     StateManager.getInstance().setState(userId, UserState.AWAITING_WEIGHT);
                     reply.setText("Укажи свой текущий вес в кг (например: 72.5):");
                 }
-
                 case AWAITING_WEIGHT ->
                 {
                     double weight = Double.parseDouble(text);
@@ -223,7 +271,6 @@ public class Bot extends TelegramLongPollingBot
                     StateManager.getInstance().setState(userId, UserState.AWAITING_HEIGHT);
                     reply.setText("Укажи свой текущий рост в сантиметрах (например: 175):");
                 }
-
                 case AWAITING_HEIGHT ->
                 {
                     double height = Double.parseDouble(text);
@@ -236,7 +283,6 @@ public class Bot extends TelegramLongPollingBot
                     user.setHeight(height);
                     db.updateUser(user);
                     StateManager.getInstance().setState(userId, UserState.AWAITING_FITNESS_LEVEL);
-
                     reply.setText("Какой у тебя уровень подготовки?");
                     InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
                     markup.setKeyboard(List.of(
@@ -247,7 +293,6 @@ public class Bot extends TelegramLongPollingBot
                     ));
                     reply.setReplyMarkup(markup);
                 }
-
                 default ->
                 {
                     reply.setText("Продолжаем редактирование профиля...");
@@ -264,21 +309,6 @@ public class Bot extends TelegramLongPollingBot
         catch (TelegramApiException e)
         {
             System.err.println("Error processing profile input: " + e.getMessage());
-        }
-    }
-
-    private void sendText(String chatId, String text)
-    {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText(text);
-        try
-        {
-            execute(message);
-        }
-        catch (TelegramApiException e)
-        {
-            System.err.println("Error sending message: " + e.getMessage());
         }
     }
 

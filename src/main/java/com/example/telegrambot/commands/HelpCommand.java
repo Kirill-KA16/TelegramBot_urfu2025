@@ -26,7 +26,7 @@ public class HelpCommand extends Command
         
         if (parts.length > 1) 
         {
-            String commandName = parts[1].replace("/", "");
+            String commandName = parts[1].replace("/", "").trim();
             reply.setText(getCommandHelp(commandName));
         }
 	else 
@@ -60,7 +60,7 @@ public class HelpCommand extends Command
     
     private String getCommandHelp(String commandName) 
     {
-        Command command = commandRegistry.getCommandByName(commandName);
+        Command command = commandRegistry.getCommandByName(commandName.trim());
         if (command != null) 
 	{
             return command.getDetailedHelp();
@@ -71,3 +71,4 @@ public class HelpCommand extends Command
         }
     }
 }
+

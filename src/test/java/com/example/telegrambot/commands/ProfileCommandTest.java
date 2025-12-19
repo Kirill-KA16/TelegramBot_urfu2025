@@ -153,7 +153,6 @@ class ProfileCommandTest {
         when(stateManagerInstance.getState(USER_ID)).thenReturn(UserState.AWAITING_EQUIPMENT);
         User user = new User(USER_ID);
         when(databaseInstance.getUser(USER_ID)).thenReturn(Optional.of(user));
-        // Мокаем showProfile косвенно — проверяем только финальное сообщение
         when(databaseInstance.getUser(USER_ID)).thenReturn(Optional.of(user));
 
         SendMessage result = profileCommand.handleCallback(createCallbackQuery("equip_Зал"));

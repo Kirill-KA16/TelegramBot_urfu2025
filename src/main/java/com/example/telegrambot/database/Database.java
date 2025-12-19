@@ -150,17 +150,28 @@ public class Database
                 """
                 SELECT
                     id,
-                    user_id AS userId,
+                    user_id,
                     weight,
-                    measurement_date AS measurementDate
+                    measurement_date
                 FROM user_measurements
                 WHERE user_id = ?
-                ORDER BY measurement_date DESC
+                ORDER BY id DESC
                 """
             )
             .bind(0, userId)
-            .mapToBean(UserMeasurement.class)
+            .map((rs, ctx) -> {
+                UserMeasurement m = new UserMeasurement();
+                m.setId(rs.getLong("id"));
+                m.setUserId(rs.getLong("user_id"));
+                m.setWeight(rs.getDouble("weight"));
+
+                String date = rs.getString("measurement_date");
+                m.setMeasurementDate(java.time.LocalDate.parse(date));
+
+                return m;
+            })
             .list()
         );
     }
+
 }

@@ -1,7 +1,7 @@
 package com.example.telegrambot;
 
 import com.example.telegrambot.database.Database;
-import com.example.telegrambot.entity.User; // Это твой User (для БД)
+import com.example.telegrambot.entity.User; 
 import com.example.telegrambot.state.StateManager;
 import com.example.telegrambot.state.UserState;
 import org.junit.jupiter.api.AfterEach;

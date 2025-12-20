@@ -4,24 +4,25 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
 import java.lang.reflect.Field;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Bot Class Basic Tests")
-class BotTest {
+class BotTest
+{
     
     private Bot bot;
     
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         bot = new Bot();
     }
     
     @Test
     @DisplayName("Bot should be created successfully")
-    void testBotCreation() {
+    void testBotCreation()
+    {
         assertNotNull(bot);
         
         String username = bot.getBotUsername();
@@ -35,7 +36,8 @@ class BotTest {
     
     @Test
     @DisplayName("Bot should have all commands registered")
-    void testCommandRegistration() throws Exception {
+    void testCommandRegistration() throws Exception
+    {
         Field registryField = Bot.class.getDeclaredField("commandRegistry");
         registryField.setAccessible(true);
         
@@ -47,7 +49,8 @@ class BotTest {
     
     @Test
     @DisplayName("Bot should load properties correctly")
-    void testPropertiesLoading() {
+    void testPropertiesLoading()
+    {
         assertDoesNotThrow(() -> {
             Bot testBot = new Bot();
             String token = testBot.getBotToken();
@@ -62,14 +65,16 @@ class BotTest {
     
     @Test
     @DisplayName("Bot constructor should throw exception for missing properties file")
-    void testBotConstructorWithoutPropertiesFile() {
+    void testBotConstructorWithoutPropertiesFile()
+    {
         System.out.println("Note: To test missing properties, temporarily rename bot.properties");
         assertTrue(true);
     }
     
     @Test
     @DisplayName("Bot getter methods should return values")
-    void testBotGetters() {
+    void testBotGetters()
+    {
         Bot testBot = new Bot();
         
         assertNotNull(testBot.getBotUsername());
@@ -81,7 +86,8 @@ class BotTest {
     
     @Test
     @DisplayName("Bot should have valid Telegram bot structure")
-    void testBotStructure() {
+    void testBotStructure()
+    {
         assertDoesNotThrow(() -> {
             Bot.class.getMethod("getBotUsername");
             Bot.class.getMethod("getBotToken");

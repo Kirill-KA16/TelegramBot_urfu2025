@@ -1,34 +1,31 @@
 package com.example.telegrambot;
 
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-
 import com.example.telegrambot.commands.Command;
 import com.example.telegrambot.commands.CommandRegistry;
 import com.example.telegrambot.commands.HelpCommand;
 import com.example.telegrambot.commands.AboutCommand;
 import com.example.telegrambot.commands.AuthorsCommand;
-
 import org.telegram.telegrambots.meta.api.objects.Chat;
-
 import java.util.Arrays;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class HelpCommandTest {
+class HelpCommandTest
+{
     
     private CommandRegistry commandRegistry;
     private HelpCommand helpCommand;
     private Message message;
     
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         commandRegistry = mock(CommandRegistry.class);
         helpCommand = new HelpCommand(commandRegistry);
         
@@ -39,16 +36,19 @@ class HelpCommandTest {
     }
     
     @Test
-    void testConstructorAndGetters() {
+    void testConstructorAndGetters()
+    {
         assertEquals("help", helpCommand.getName());
         assertEquals("Shows help for commands", helpCommand.getDescription());
     }
     
     @Nested
-    class GeneralHelpTests {
+    class GeneralHelpTests
+    {
         
         @Test
-        void testExecuteGeneralHelp() {
+        void testExecuteGeneralHelp()
+        {
             message.setText("/help");
             
             Command aboutCommand = new AboutCommand();
@@ -72,7 +72,8 @@ class HelpCommandTest {
         }
         
         @Test
-        void testExecuteWithNoOtherCommands() {
+        void testExecuteWithNoOtherCommands()
+        {
             message.setText("/help");
             
             List<Command> commands = Arrays.asList(helpCommand);
@@ -88,10 +89,12 @@ class HelpCommandTest {
     }
     
     @Nested
-    class SpecificHelpTests {
+    class SpecificHelpTests
+    {
         
         @Test
-        void testExecuteSpecificHelp() {
+        void testExecuteSpecificHelp()
+        {
             message.setText("/help about");
             
             Command aboutCommand = new AboutCommand();
@@ -105,7 +108,8 @@ class HelpCommandTest {
         }
         
         @Test
-        void testExecuteNonExistentCommandHelp() {
+        void testExecuteNonExistentCommandHelp()
+        {
             message.setText("/help unknown");
             
             when(commandRegistry.getCommandByName("unknown")).thenReturn(null);
@@ -117,7 +121,8 @@ class HelpCommandTest {
         }
         
         @Test
-        void testExecuteHelpWithExtraSpaces() {
+        void testExecuteHelpWithExtraSpaces()
+        {
             message.setText("/help  about  ");
             
             Command aboutCommand = new AboutCommand();
@@ -129,7 +134,8 @@ class HelpCommandTest {
         }
         
         @Test
-        void testExecuteHelpWithSlashInParameter() {
+        void testExecuteHelpWithSlashInParameter()
+        {
             message.setText("/help /about");
             
             Command aboutCommand = new AboutCommand();
@@ -142,14 +148,16 @@ class HelpCommandTest {
     }
     
     @Test
-    void testMatchesMethod() {
+    void testMatchesMethod()
+    {
         assertTrue(helpCommand.matches("/help"));
         assertFalse(helpCommand.matches("help"));
         assertFalse(helpCommand.matches("/about"));
     }
     
     @Test
-    void testGetDetailedHelp() {
+    void testGetDetailedHelp()
+    {
         assertEquals("Shows help for commands", helpCommand.getDetailedHelp());
     }
 }

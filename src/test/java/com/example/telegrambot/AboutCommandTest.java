@@ -4,20 +4,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-
 import com.example.telegrambot.commands.AboutCommand;
-
 import org.telegram.telegrambots.meta.api.objects.Chat;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AboutCommandTest {
+class AboutCommandTest
+{
     
     private AboutCommand aboutCommand;
     private Message message;
     
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         aboutCommand = new AboutCommand();
         
         message = new Message();
@@ -27,13 +27,15 @@ class AboutCommandTest {
     }
     
     @Test
-    void testConstructorAndGetters() {
+    void testConstructorAndGetters()
+    {
         assertEquals("about", aboutCommand.getName());
         assertEquals("Shows information abouth this bot", aboutCommand.getDescription());
     }
     
     @Test
-    void testExecuteMethod() {
+    void testExecuteMethod()
+    {
         SendMessage result = aboutCommand.execute(message);
         
         assertNotNull(result);
@@ -42,7 +44,8 @@ class AboutCommandTest {
     }
     
     @Test
-    void testMatchesMethod() {
+    void testMatchesMethod()
+    {
         assertTrue(aboutCommand.matches("/about"));
         assertFalse(aboutCommand.matches("about"));
         assertFalse(aboutCommand.matches("/help"));
@@ -51,7 +54,8 @@ class AboutCommandTest {
     }
     
     @Test
-    void testGetDetailedHelp() {
+    void testGetDetailedHelp()
+    {
         String detailedHelp = aboutCommand.getDetailedHelp();
         assertNotNull(detailedHelp);
         assertTrue(detailedHelp.contains("/about"));

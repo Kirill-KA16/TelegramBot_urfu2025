@@ -4,20 +4,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-
 import com.example.telegrambot.commands.AuthorsCommand;
-
 import org.telegram.telegrambots.meta.api.objects.Chat;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AuthorsCommandTest {
+class AuthorsCommandTest
+{
     
     private AuthorsCommand authorsCommand;
     private Message message;
     
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         authorsCommand = new AuthorsCommand();
         
         message = new Message();
@@ -27,7 +27,8 @@ class AuthorsCommandTest {
     }
     
     @Test
-    void testExecuteReturnsSendMessageWithText() {
+    void testExecuteReturnsSendMessageWithText()
+    {
         SendMessage result = authorsCommand.execute(message);
         
         assertNotNull(result);
@@ -37,18 +38,21 @@ class AuthorsCommandTest {
     }
     
     @Test
-    void testCommandHasCorrectName() {
+    void testCommandHasCorrectName()
+    {
         assertEquals("authors", authorsCommand.getName());
     }
     
     @Test
-    void testCommandHasCorrectDescription() {
+    void testCommandHasCorrectDescription()
+    {
         assertEquals("Shows information about authors", 
                     authorsCommand.getDescription());
     }
     
     @Test
-    void testMatchesMethod() {
+    void testMatchesMethod()
+    {
         assertTrue(authorsCommand.matches("/authors"));
         assertFalse(authorsCommand.matches("authors"));
         assertFalse(authorsCommand.matches("/about"));

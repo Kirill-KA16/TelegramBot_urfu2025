@@ -51,6 +51,7 @@ public class Bot extends TelegramLongPollingBot
 
     private void registerCommands()
     {
+        commandRegistry.registerCommand(new StartCommand());
         commandRegistry.registerCommand(new AboutCommand());
         commandRegistry.registerCommand(new AuthorsCommand());
         commandRegistry.registerCommand(new HelpCommand(commandRegistry));

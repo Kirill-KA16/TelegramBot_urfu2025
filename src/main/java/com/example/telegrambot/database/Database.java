@@ -3,7 +3,6 @@ package com.example.telegrambot.database;
 import com.example.telegrambot.entity.User;
 import com.example.telegrambot.entity.UserMeasurement;
 import com.example.telegrambot.entity.TrainingPlan;
-
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlite3.SQLitePlugin;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
@@ -34,7 +33,6 @@ public class Database
         }
 
         String url = "jdbc:sqlite:" + dbPath;
-
         this.jdbi = Jdbi.create(url)
                         .installPlugin(new SQLitePlugin())
                         .installPlugin(new SqlObjectPlugin());
@@ -58,27 +56,46 @@ public class Database
             handle.execute(
                 """
                 CREATE TABLE IF NOT EXISTS users (
-                    user_id         BIGINT PRIMARY KEY,
-                    goal            TEXT,
-                    gender          TEXT,
-                    age             INTEGER,
-                    weight          REAL,
-                    height          REAL,
-                    fitness_level   TEXT,
-                    equipment       TEXT,
-                    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+                    user_id BIGINT PRIMARY KEY,
+                    goal TEXT,
+                    gender TEXT,
+                    age INTEGER,
+                    weight REAL,
+                    height REAL,
+                    fitness_level TEXT,
+                    equipment TEXT,
+                    current_workout_plan TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
                 """
             );
 
+            try
+            {
+                handle.execute("ALTER TABLE users ADD COLUMN current_workout_plan TEXT");
+                System.out.println("Колонка current_workout_plan успешно добавлена.");
+            }
+            catch (Exception e)
+            {
+                if (e.getMessage() != null && e.getMessage().contains("duplicate column name"))
+                {
+                    System.out.println("Колонка current_workout_plan уже существует.");
+                }
+                else
+                {
+                    System.err.println("Ошибка при добавлении колонки current_workout_plan:");
+                    e.printStackTrace();
+                }
+            }
+
             handle.execute(
                 """
                 CREATE TABLE IF NOT EXISTS user_measurements (
-                    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id             BIGINT NOT NULL,
-                    weight              REAL NOT NULL,
-                    measurement_date    DATE NOT NULL DEFAULT CURRENT_DATE,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id BIGINT NOT NULL,
+                    weight REAL NOT NULL,
+                    measurement_date DATE NOT NULL DEFAULT CURRENT_DATE,
                     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
                 )
                 """
@@ -87,12 +104,12 @@ public class Database
             handle.execute(
                 """
                 CREATE TABLE IF NOT EXISTS training_plans (
-                    id               INTEGER PRIMARY KEY AUTOINCREMENT,
-                    goal             TEXT NOT NULL,
-                    fitness_level    TEXT NOT NULL,
-                    equipment        TEXT NOT NULL,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    goal TEXT NOT NULL,
+                    fitness_level TEXT NOT NULL,
+                    equipment TEXT NOT NULL,
                     plan_description TEXT,
-                    exercises        TEXT NOT NULL
+                    exercises TEXT NOT NULL
                 )
                 """
             );
@@ -161,6 +178,25 @@ public class Database
             .bind(0, userId)
             .mapToBean(UserMeasurement.class)
             .list()
+        );
+    }
+
+    public void saveWorkoutPlan(long userId, String planText)
+    {
+        jdbi.useHandle(h -> h.execute(
+            "UPDATE users SET current_workout_plan = ? WHERE user_id = ?",
+            planText,
+            userId
+        ));
+    }
+
+    public Optional<String> getWorkoutPlan(long userId)
+    {
+        return jdbi.withHandle(h ->
+            h.createQuery("SELECT current_workout_plan FROM users WHERE user_id = ?")
+             .bind(0, userId)
+             .mapTo(String.class)
+             .findFirst()
         );
     }
 }

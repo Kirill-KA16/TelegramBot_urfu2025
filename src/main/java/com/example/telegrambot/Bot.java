@@ -1,5 +1,6 @@
 package com.example.telegrambot;
 
+import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -27,23 +28,12 @@ public class Bot extends TelegramLongPollingBot
     private final CommandRegistry commandRegistry;
     private final Database db = Database.getInstance();
 
-    public Bot()
+    public Bot(String botToken, String botUsername)
     {
-        Properties props = new Properties();
-        try (FileInputStream fis = new FileInputStream("src/main/resources/bot.properties"))
-        {
-            props.load(fis);
-            this.botToken = props.getProperty("bot.token");
-            this.botUsername = props.getProperty("bot.username");
-            if (botToken == null || botUsername == null)
-            {
-                throw new RuntimeException("botToken or botUsername not set in bot.properties file");
-            }
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException("Failed to load configuration", e);
-        }
+        super(new DefaultBotOptions(), botToken);
+
+        this.botToken = botToken;
+        this.botUsername = botUsername;
 
         this.commandRegistry = new CommandRegistry();
         registerCommands();
@@ -57,6 +47,7 @@ public class Bot extends TelegramLongPollingBot
         commandRegistry.registerCommand(new HelpCommand(commandRegistry));
         commandRegistry.registerCommand(new ProfileCommand());
         commandRegistry.registerCommand(new CalculatorsCommand());
+        commandRegistry.registerCommand(new CreatePlanCommand());
     }
 
     @Override
@@ -77,7 +68,6 @@ public class Bot extends TelegramLongPollingBot
         if (update.hasMessage() && update.getMessage().hasText())
         {
             String messageText = update.getMessage().getText();
-
             if (commandRegistry.isCommand(messageText) || messageText.startsWith("/help "))
             {
                 processCommand(update);
@@ -100,12 +90,13 @@ public class Bot extends TelegramLongPollingBot
         {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             String data = callbackQuery.getData();
+
             if (data.startsWith("profile_")
-                || data.startsWith("goal_")
-                || data.startsWith("gender_")
-                || data.startsWith("level_")
-                || data.startsWith("equip_")
-                || "cancel_edit".equals(data))
+                    || data.startsWith("goal_")
+                    || data.startsWith("gender_")
+                    || data.startsWith("level_")
+                    || data.startsWith("equip_")
+                    || "cancel_edit".equals(data))
             {
                 Command profileCmd = commandRegistry.getCommandByName("profile");
                 if (profileCmd instanceof ProfileCommand profileCommand)
@@ -122,9 +113,11 @@ public class Bot extends TelegramLongPollingBot
                             System.err.println("Error sending callback response: " + e.getMessage());
                         }
                     }
+
                     AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
                             .callbackQueryId(callbackQuery.getId())
                             .build();
+
                     try
                     {
                         execute(answer);
@@ -152,10 +145,11 @@ public class Bot extends TelegramLongPollingBot
                             System.err.println("Error sending callback response: " + e.getMessage());
                         }
                     }
-                    // Подтверждаем получение callback
+
                     AnswerCallbackQuery answer = AnswerCallbackQuery.builder()
                             .callbackQueryId(callbackQuery.getId())
                             .build();
+
                     try
                     {
                         execute(answer);
@@ -232,19 +226,23 @@ public class Bot extends TelegramLongPollingBot
         long userId = message.getFrom().getId();
         String text = message.getText().trim().replace(",", ".");
         String chatId = message.getChatId().toString();
-        User user = db.getUser(userId).orElseGet(() -> {
+
+        User user = db.getUser(userId).orElseGet(() ->
+        {
             User newUser = new User();
             newUser.setUserId(userId);
             db.updateUser(newUser);
             return newUser;
         });
+
         SendMessage reply = new SendMessage();
         reply.setChatId(chatId);
+
         try
         {
             switch (state)
             {
-                case AWAITING_AGE ->
+                case AWAITING_AGE:
                 {
                     int age = Integer.parseInt(text);
                     if (age < 10 || age > 120)
@@ -257,8 +255,9 @@ public class Bot extends TelegramLongPollingBot
                     db.updateUser(user);
                     StateManager.getInstance().setState(userId, UserState.AWAITING_WEIGHT);
                     reply.setText("Укажи свой текущий вес в кг (например: 72.5):");
+                    break;
                 }
-                case AWAITING_WEIGHT ->
+                case AWAITING_WEIGHT:
                 {
                     double weight = Double.parseDouble(text);
                     if (weight < 30 || weight > 300)
@@ -271,8 +270,9 @@ public class Bot extends TelegramLongPollingBot
                     db.updateUser(user);
                     StateManager.getInstance().setState(userId, UserState.AWAITING_HEIGHT);
                     reply.setText("Укажи свой текущий рост в сантиметрах (например: 175):");
+                    break;
                 }
-                case AWAITING_HEIGHT ->
+                case AWAITING_HEIGHT:
                 {
                     double height = Double.parseDouble(text);
                     if (height < 130 || height > 250)
@@ -285,18 +285,21 @@ public class Bot extends TelegramLongPollingBot
                     db.updateUser(user);
                     StateManager.getInstance().setState(userId, UserState.AWAITING_FITNESS_LEVEL);
                     reply.setText("Какой у тебя уровень подготовки?");
+
                     InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
                     markup.setKeyboard(List.of(
-                        List.of(createButton("Новичок", "level_Новичок")),
-                        List.of(createButton("Средний", "level_Средний")),
-                        List.of(createButton("Продвинутый", "level_Продвинутый")),
-                        List.of(createButton("Отмена", "cancel_edit"))
+                            List.of(createButton("Новичок", "level_Новичок")),
+                            List.of(createButton("Средний", "level_Средний")),
+                            List.of(createButton("Продвинутый", "level_Продвинутый")),
+                            List.of(createButton("Отмена", "cancel_edit"))
                     ));
                     reply.setReplyMarkup(markup);
+                    break;
                 }
-                default ->
+                default:
                 {
                     reply.setText("Продолжаем редактирование профиля...");
+                    break;
                 }
             }
             execute(reply);
@@ -304,8 +307,14 @@ public class Bot extends TelegramLongPollingBot
         catch (NumberFormatException e)
         {
             reply.setText("Пожалуйста, введи корректное число:");
-            try { execute(reply); }
-            catch (TelegramApiException ex) { System.err.println("Error: " + ex.getMessage()); }
+            try
+            {
+                execute(reply);
+            }
+            catch (TelegramApiException ex)
+            {
+                System.err.println("Error: " + ex.getMessage());
+            }
         }
         catch (TelegramApiException e)
         {
@@ -325,10 +334,24 @@ public class Bot extends TelegramLongPollingBot
     {
         try
         {
+            Properties props = new Properties();
+            try (FileInputStream fis = new FileInputStream("src/main/resources/bot.properties"))
+            {
+                props.load(fis);
+            }
+
+            String token = props.getProperty("bot.token");
+            String username = props.getProperty("bot.username");
+
+            if (token == null || username == null)
+            {
+                throw new RuntimeException("botToken or botUsername not set in bot.properties file");
+            }
+
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            botsApi.registerBot(new Bot());
+            botsApi.registerBot(new Bot(token, username));
         }
-        catch (TelegramApiException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
